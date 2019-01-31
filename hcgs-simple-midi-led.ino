@@ -9,8 +9,17 @@
  * and have to keep switching for programming (unless using the ICSP header)
  */
 
-// #define __SERIAL_DEBUG__ 1
-// #define __MIDI_SOFTWARE_SERIAL__ 1
+// useful for MIDI debugging
+//#define __SERIAL_DEBUG__ 1
+
+// this one outputs debugging for color manipulation, not for MIDI debugging
+// #define __SERIAL_DEBUG_COLOR__ 1
+
+//#define __MIDI_SOFTWARE_SERIAL__ 1
+
+
+
+
 
 #ifdef __MIDI_SOFTWARE_SERIAL__
 
@@ -29,9 +38,8 @@ MIDI_CREATE_INSTANCE(HardwareSerial, Serial, midiCtl);
 #endif
 
 
-
-#define PIN_LED_R 6
-#define PIN_LED_G 7
+#define PIN_LED_R 7
+#define PIN_LED_G 6
 #define PIN_LED_B 8
 
 #define PIN_BTN_R 3
@@ -39,6 +47,10 @@ MIDI_CREATE_INSTANCE(HardwareSerial, Serial, midiCtl);
 #define PIN_BTN_B 5
 
 #define PIN_NEO A3
+
+// undefine MIDI_CHANNEL to listen to all channels
+//#define MIDI_CHANNEL 2
+
 
 #define MIDI_NOTE_R 60
 #define MIDI_NOTE_G 64
@@ -136,7 +148,7 @@ void loop() {
       if (colorValues[x]>0) {
         doUpdate=true;
         
-#ifdef __SERIAL_DEBUG__
+#ifdef __SERIAL_DEBUG_COLOR__
         Serial.print(F("manipColor "));
         Serial.print(x);
         Serial.print(F(" - "));
@@ -146,7 +158,7 @@ void loop() {
         // move the color value in the direction that this color is moving (brighter or dimmer)
         colorValues[x] += colorDirections[x] * UPDATE_COLOR_INCREMENT;      
 
-#ifdef __SERIAL_DEBUG__
+#ifdef __SERIAL_DEBUG_COLOR__
         Serial.print(F(" -> "));
         Serial.println(colorValues[x]);
 #endif
@@ -179,11 +191,21 @@ void noteOn(byte channel, byte note, byte velocity) {
 
 #endif
 
+
+#ifdef MIDI_CHANNEL
+  if (channel == MIDI_CHANNEL) {
+#endif   
+  
   for (int x=0; x<NUM_COLORS; x++) {
     if (note == colorNotes[x] && velocity > 0) {
       colorEnable(x);
     }
   }
+
+#ifdef MIDI_CHANNEL
+  }
+#endif
+  
 }
 
 void noteOff(byte channel, byte note, byte velocity) {
@@ -193,7 +215,11 @@ void noteOff(byte channel, byte note, byte velocity) {
   Serial.print(F(" note: "));
   Serial.print(note);
   Serial.print(F(" vel: "));
-  Serial.println(velocity);#endif
+  Serial.println(velocity);
+#endif
+
+#ifdef MIDI_CHANNEL
+  if (channel == MIDI_CHANNEL) {
 #endif
 
   for (int x=0; x<NUM_COLORS; x++) {
@@ -201,6 +227,10 @@ void noteOff(byte channel, byte note, byte velocity) {
       colorDisable(x);
     }
   }
+
+#ifdef MIDI_CHANNEL
+  }
+#endif
 } 
 
 void updateDisplay() {
@@ -210,7 +240,7 @@ void updateDisplay() {
 }
 
 void colorEnable(byte cIdx) {
-#ifdef __SERIAL_DEBUG__
+#ifdef __SERIAL_DEBUG_COLOR__
   Serial.print(F("colorEnable "));
   Serial.println(cIdx);
 #endif
@@ -221,7 +251,7 @@ void colorEnable(byte cIdx) {
 }
 
 void colorDisable(byte cIdx) {
-#ifdef __SERIAL_DEBUG__
+#ifdef __SERIAL_DEBUG_COLOR__
   Serial.print(F("colorDisable "));
   Serial.println(cIdx);
 #endif
