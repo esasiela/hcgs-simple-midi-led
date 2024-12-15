@@ -4,4 +4,4 @@ This is the firmware for a simple sketch to listen for MIDI IN messages and mani
 
 Details about the design and hardware are at [Hedge Court](https://www.hedgecourt.com/robots/grumpenspiel/simple-midi-led)
 
-A fun project.
+A fun project, I hope you enjoy it.
